@@ -54,10 +54,10 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const output = `Your tests ${context.payload.check_suite.conclusion === 'success' ? 'passed! 🎉' : 'failed 🥺'}.\n\nYour grade: ${context.payload.check_suite.conclusion === 'success' ? 'A' : 'F'}.`
+            const output = `Your tests ${process.env.state === 'passed' ? 'passed! 🎉' : 'failed 🥺'}.\n\nYour grade: ${process.env.state === 'passed' ? 'A' : 'F'}.`
             github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
             });
