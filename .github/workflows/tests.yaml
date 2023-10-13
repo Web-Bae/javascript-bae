@@ -1,0 +1,43 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - main # or your default branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x] # or whatever Node version you're using
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Comment PR with feedback
+        if: always() # this ensures the step runs even if previous steps fail
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const output = `Your tests ${context.payload.check_suite.conclusion === 'success' ? 'passed' : 'failed'}.\n\nYour grade: ${context.payload.check_suite.conclusion === 'success' ? 'A' : 'F'}.`
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
