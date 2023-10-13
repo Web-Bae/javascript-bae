@@ -57,7 +57,7 @@ jobs:
           script: |
             const { owner, repo, number } = context.issue;
             let conclusion = process.env.state === 'passed' ? 'A' : 'F';
-            const output = `Your tests ${conclusion === 'A' ? 'passed' : 'failed'}.\n\nYour grade: ${conclusion}.`
+            const output = `Your tests ${conclusion === 'A' ? 'passed 🎉' : 'failed 🥺'}.\n\nYour grade: ${conclusion}.`
             github.rest.issues.createComment({
               owner,
               repo,
