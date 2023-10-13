@@ -34,7 +34,7 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test:karma
+        run: npm run test:karma
         id: tests
         continue-on-error: true
 
