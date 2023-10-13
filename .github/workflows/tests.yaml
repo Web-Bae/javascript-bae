@@ -56,10 +56,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo, number } = context.issue;
-            let conclusion = "F"; // Default to "F"
-            if (context.payload.check_suite && context.payload.check_suite.conclusion === 'success') {
-                conclusion = "A";
-            }
+            let conclusion = process.env.state === 'passed' ? 'A' : 'F';
             const output = `Your tests ${conclusion === 'A' ? 'passed' : 'failed'}.\n\nYour grade: ${conclusion}.`
             github.rest.issues.createComment({
               owner,
@@ -67,3 +64,7 @@ jobs:
               issue_number: number,
               body: output
             });
+
+      - name: Fail workflow if tests failed
+        if: env.state == 'failed'
+        run: exit 1
