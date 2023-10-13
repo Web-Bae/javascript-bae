@@ -3,7 +3,7 @@ name: Run Tests
 on:
   pull_request:
     branches:
-      - main # or your default branch name
+      - main
 
 jobs:
   build:
@@ -11,11 +11,19 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x] # or whatever Node version you're using
+        node-version: [16.x]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Setup caching for node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
@@ -26,7 +34,20 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test
+        run: npm run test:remote
+        id: tests
+        continue-on-error: true
+
+      - name: Set result
+        id: result
+        run: |
+          if [[ "${{ steps.tests.outcome }}" == "success" ]]; then
+            echo "grade=A" >> $GITHUB_ENV
+            echo "state=passed" >> $GITHUB_ENV
+          else
+            echo "grade=F" >> $GITHUB_ENV
+            echo "state=failed" >> $GITHUB_ENV
+          fi
 
       - name: Comment PR with feedback
         if: always() # this ensures the step runs even if previous steps fail
@@ -34,10 +55,16 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const output = `Your tests ${context.payload.check_suite.conclusion === 'success' ? 'passed' : 'failed'}.\n\nYour grade: ${context.payload.check_suite.conclusion === 'success' ? 'A' : 'F'}.`
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            const { owner, repo, number } = context.issue;
+            let conclusion = process.env.state === 'passed' ? 'A' : 'F';
+            const output = `Your tests ${conclusion === 'A' ? 'passed 🎉' : 'failed 🥺'}.\n\nYour grade: ${conclusion}.`
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
               body: output
             });
+
+      - name: Fail workflow if tests failed
+        if: env.state == 'failed'
+        run: exit 1
