@@ -55,11 +55,15 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const output = `Your tests ${process.env.STATE === 'passed' ? 'passed! 🎉' : 'failed 🥺'}.\n\nYour grade: ${process.env.STATE === 'passed' ? 'A' : 'F'}.`
-            const pr = context.payload.pull_request;
-            return octokit.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number,
+            const { owner, repo, number } = context.issue;
+            let conclusion = "F"; // Default to "F"
+            if (context.payload.check_suite && context.payload.check_suite.conclusion === 'success') {
+                conclusion = "A";
+            }
+            const output = `Your tests ${conclusion === 'A' ? 'passed' : 'failed'}.\n\nYour grade: ${conclusion}.`
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
               body: output
             });
