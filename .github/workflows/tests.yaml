@@ -55,10 +55,15 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const output = `Your tests ${{ steps.result.outputs.state }}.\n\nYour grade: ${{ steps.result.outputs.grade }}.`
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
+            const { owner, repo, number } = context.issue;
+            let conclusion = "F"; // Default to "F"
+            if (context.payload.check_suite && context.payload.check_suite.conclusion === 'success') {
+                conclusion = "A";
+            }
+            const output = `Your tests ${conclusion === 'A' ? 'passed' : 'failed'}.\n\nYour grade: ${conclusion}.`
+            github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: number,
+            body: output
             });
