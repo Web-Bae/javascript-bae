@@ -51,7 +51,7 @@ jobs:
 
       - name: Extract test failures
         id: test_failures
-        run: node parse-junit.js test-results/results.xml > test_failures.txt
+        run: node ./parse-junit.js test-results/results.xml > test_failures.txt
 
       - name: Comment PR with feedback
         if: always() # this ensures the step runs even if previous steps fail
