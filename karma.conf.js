@@ -23,12 +23,7 @@ module.exports = function (config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://www.npmjs.com/search?q=keywords:karma-reporter
-    reporters: ["progress", "junit"],
-
-    junitReporter: {
-      outputDir: "test-results", // results will be saved in this directory
-      outputFile: "results.xml", // and in this file within that directory
-    },
+    reporters: ["progress"],
 
     // web server port
     port: 9876,
