@@ -17,6 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup caching for node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -27,6 +35,19 @@ jobs:
 
       - name: Run tests
         run: npm test
+        id: tests
+        continue-on-error: true
+
+      - name: Set result
+        id: result
+        run: |
+          if [[ "${{ steps.tests.outcome }}" == "success" ]]; then
+            echo "::set-output name=grade::A"
+            echo "::set-output name=state::passed"
+          else
+            echo "::set-output name=grade::F"
+            echo "::set-output name=state::failed"
+          fi
 
       - name: Comment PR with feedback
         if: always() # this ensures the step runs even if previous steps fail
@@ -34,7 +55,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const output = `Your tests ${context.payload.check_suite.conclusion === 'success' ? 'passed' : 'failed'}.\n\nYour grade: ${context.payload.check_suite.conclusion === 'success' ? 'A' : 'F'}.`
+            const output = `Your tests ${{ steps.result.outputs.state }}.\n\nYour grade: ${{ steps.result.outputs.grade }}.`
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

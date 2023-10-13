@@ -3,12 +3,17 @@
   "version": "1.0.0",
   "description": "Strings Test",
   "scripts": {
-    "test": "open SpecRunner.html"
+    "test": "open SpecRunner.html",
+    "test:karma": "karma start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jasmine": "^5.1.0"
+    "jasmine": "^5.1.0",
+    "jasmine-core": "^5.1.1",
+    "karma": "^6.4.2",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-jasmine": "^5.1.0"
   }
 }

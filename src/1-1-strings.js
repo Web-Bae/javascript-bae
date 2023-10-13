@@ -5,5 +5,5 @@ function greet() {
 
 function logWhatsUp() {
   // Your Code Here
-  console.log("What's up?");
+  console.log("What's ?");
 }
