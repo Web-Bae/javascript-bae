@@ -34,9 +34,9 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm run test:karma
+        run: npm run test:remote
         id: tests
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Set result
         id: result
@@ -48,34 +48,3 @@ jobs:
             echo "::set-output name=grade::F"
             echo "::set-output name=state::failed"
           fi
-
-      - name: Extract test failures
-        id: test_failures
-        run: node ./parse-junit.js test-results/results.xml > test_failures.txt
-
-      - name: Comment PR with feedback
-        if: always() # this ensures the step runs even if previous steps fail
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const fs = require('fs');
-            const failures = fs.readFileSync('test_failures.txt', 'utf8');
-
-            const { owner, repo, number } = context.issue;
-            let conclusion = "F"; // Default to "F"
-            if (context.payload.check_suite && context.payload.check_suite.conclusion === 'success') {
-                conclusion = "A";
-            }
-            const output = `
-            Your tests ${conclusion === 'A' ? 'passed' : 'failed'}.
-            Your grade: ${conclusion}.
-            Test Failures:
-            ${failures}
-                `;
-                github.rest.issues.createComment({
-                    owner,
-                    repo,
-                    issue_number: number,
-                    body: output
-                });

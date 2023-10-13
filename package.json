@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Strings Test",
   "scripts": {
-    "test": "open SpecRunner.html",
-    "test:karma": "karma start"
+    "test:local": "open SpecRunner.html",
+    "test:remote": "karma start"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +14,6 @@
     "jasmine-core": "^5.1.1",
     "karma": "^6.4.2",
     "karma-chrome-launcher": "^3.2.0",
-    "karma-jasmine": "^5.1.0",
-    "karma-junit-reporter": "^2.0.1"
-  },
-  "dependencies": {
-    "xml2js": "^0.6.2"
+    "karma-jasmine": "^5.1.0"
   }
 }
